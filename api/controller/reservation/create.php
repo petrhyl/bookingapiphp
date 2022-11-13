@@ -7,13 +7,15 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Access-Contr
 
 require_once '../../config/bootstrap.php';
 
-// api example: /controller/reservation/create.php
+// *** api example: ***
+// /controller/reservation/create.php 
+//
 // body:
 // {
 //     "guest":{
 //         "firstname":"Pavel",
 //         "lastname":"Havel",
-//         "email":"hp@.com"
+//         "email":"hp@nl.com"
 //     },
 //     "from":"2022-10-20",
 //     "to":"2022-10-23",
