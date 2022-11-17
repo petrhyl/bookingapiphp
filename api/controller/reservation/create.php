@@ -7,20 +7,29 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Access-Contr
 
 require_once '../../config/bootstrap.php';
 
-// *** api example: ***
-// /controller/reservation/create.php 
-//
-// body:
-// {
-//     "guest":{
-//         "firstname":"Pavel",
-//         "lastname":"Havel",
-//         "email":"hp@nl.com"
-//     },
-//     "from":"2022-10-20",
-//     "to":"2022-10-23",
-//     "type_id":4
-// }
+/* 
+*** api example: ***
+/controller/reservation/create.php 
+body:
+{
+    "guest":{
+        "firstname":"Pavel",
+        "lastname":"Havel",
+        "email":"hp@nl.com"
+    },
+    "from":"2022-10-20",
+    "to":"2022-10-23",
+   "id_type":4
+}
+
+*** successful response example: 
+{
+    "reservation": {
+        "id": 6,
+        "message": "Reservation was created."
+    }
+}
+ */ 
 
 $data = (array)json_decode(file_get_contents("php://input"), true);
 
@@ -109,7 +118,7 @@ if ($from <= $currentDate) {
     die();
 }
 
-$type_id_str = strip_tags($data['type_id']);
+$type_id_str = strip_tags($data['id_type']);
 
 if (!is_numeric($type_id_str)) {
     http_response_code(422);
