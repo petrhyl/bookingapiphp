@@ -8,6 +8,27 @@ require_once '../../config/bootstrap.php';
 // * * * * * * * *
 // api example: /controller/roomtypes/free.php?from=2022-10-01&to=23-10-2022&persons=2
 // * * * * * * * *
+// api response example: 
+// {
+//     "rooms": [
+//         {
+//             "ID_type": 2,
+//             "beds_number": 2,
+//             "double_bed": false,
+//             "business": false,
+//             "name": "Dvě lůžka - standardní výbava",
+//             "description": "Pro dvě osoby. Standardní výbava."
+//         },
+//         {
+//             "ID_type": 3,
+//             "beds_number": 2,
+//             "double_bed": true,
+//             "business": true,
+//             "name": "Dvě lůžka - business class",
+//             "description": "Pro dvě osoby. Business class."
+//         }
+//     ]
+// }
 
 if(!isset($_GET['from'])||!isset($_GET['to'])||!isset($_GET['persons'])){
     http_response_code(400);
@@ -34,7 +55,7 @@ if ($from>$to) {
 
 $person_number_str=strip_tags($_GET['persons']);
 
-if (!is_numeric($person_number_str)) {
+if (!filter_var($person_number_str,FILTER_VALIDATE_INT)) {
     http_response_code(422);
     echo json_encode(["error"=>["message"=>"Parameter 'persons' is not a number."]]);
     die();

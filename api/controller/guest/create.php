@@ -19,7 +19,7 @@ $frstname = strip_tags($data['firstname']);
 $lstname = strip_tags($data['lastname']);
 $email = strip_tags($data['email']);
 
-$reg_str = "/^[a-zA-Z-' ]*$/";
+$reg_str = "/^[a-Ž \-']*$/";
 
 if (!preg_match($reg_str, $frstname) || !preg_match($reg_str, $lstname)) {
     http_response_code(422);

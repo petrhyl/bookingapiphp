@@ -22,7 +22,7 @@ body:
    "id_type":4
 }
 
-*** successful response example: 
+*** successful response example: ***
 {
     "reservation": {
         "id": 6,
@@ -45,7 +45,7 @@ $frstname=strip_tags($data['guest']['firstname']);
 $lstname = strip_tags($data['guest']['lastname']);
 $email=strip_tags($data['guest']['email']);
 
-$reg_str="/^[a-zA-Z-' ]*$/";
+$reg_str="/^[a-Ž \-']*$/";
 
 if (!preg_match($reg_str,$frstname)||!preg_match($reg_str,$lstname)) {
     http_response_code(422);
@@ -120,9 +120,9 @@ if ($from <= $currentDate) {
 
 $type_id_str = strip_tags($data['id_type']);
 
-if (!is_numeric($type_id_str)) {
+if (!filter_var($type_id_str, FILTER_VALIDATE_INT)) {
     http_response_code(422);
-    echo json_encode(["error" => ["message" => "Parameter 'persons' is not a number."]]);
+    echo json_encode(["error" => ["message" => "Type of room is not a valid number."]]);
     die();
 }
 
@@ -151,6 +151,7 @@ if ($result === false) {
     die();
 }
 
+http_response_code(201);
 echo json_encode([
     "reservation" => [
         "id" => $result,

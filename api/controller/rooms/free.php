@@ -30,7 +30,7 @@ if ($from>$to) {
 
 $type_str=strip_tags($_GET['id_type']);
 
-if (!is_numeric($type_str)) {
+if (!filter_var($type_str,FILTER_VALIDATE_INT)) {
     http_response_code(422);
     echo json_encode(["error"=>["message"=>"Parameter 'id_type' is not valid."]]);
     die();
