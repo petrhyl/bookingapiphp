@@ -17,7 +17,9 @@ require_once '../../config/bootstrap.php';
 //             "double_bed": false,
 //             "business": false,
 //             "name": "Dvě lůžka - standardní výbava",
-//             "description": "Pro dvě osoby. Standardní výbava."
+//             "description": "Pro dvě osoby. Standardní výbava.",
+//             "picture": "path",
+//             "numberOfAvailable": 1
 //         },
 //         {
 //             "ID_type": 3,
@@ -25,7 +27,9 @@ require_once '../../config/bootstrap.php';
 //             "double_bed": true,
 //             "business": true,
 //             "name": "Dvě lůžka - business class",
-//             "description": "Pro dvě osoby. Business class."
+//             "description": "Pro dvě osoby. Business class.",
+//             "picture": "https://hyl-petr.xf.cz/images/fourbeds_business.jpg",
+//             "numberOfAvailable": 2
 //         }
 //     ]
 // }

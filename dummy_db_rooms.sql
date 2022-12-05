@@ -1,4 +1,4 @@
-INSERT INTO booking.rooms (
+INSERT INTO booking.rooms(
     ID_room,
     ID_type,
     description

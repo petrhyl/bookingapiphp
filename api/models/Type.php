@@ -12,6 +12,8 @@ class Type
     public bool $business;
     public string $name;
     public string $description;
+    public string $picture;
+    public ?int $numberOfAvailable;
 
     public function __construct(PDO $db_connection)
     {
@@ -47,6 +49,7 @@ class Type
         $this->business = htmlspecialchars((bool)$data['business']);
         $this->name = htmlspecialchars($data['name']);
         $this->description = htmlspecialchars($data['description']);
+        $this->picture = htmlspecialchars($data['picture']);
 
         return $this;
     }
@@ -91,23 +94,26 @@ class Type
 
     public function findFreeTypesByDateIntervalAndMinBedsNumber(DateTime $from, DateTime $to, int $min_number_of_beds): array|false
     {
-        $query = 'SELECT * FROM ' . addslashes($this::TABLE_TYPES) . '
-        WHERE ID_type IN (
-            SELECT ID_type FROM ' . addslashes(Room::TABLE_ROOMS) . '
-            WHERE 
-            ID_room NOT IN (
-                SELECT ID_room from ' . addslashes(Reservation::TABLE_RESERVATIONS) . '
-                WHERE 
-                (
-                    (date_from >= :d_from AND date_from < :d_to) 
-                    OR
-                    (date_to > :d_from AND date_to <= :d_to)
-                )
-                OR (date_from < :d_from AND date_to > :d_to)
-
+        $query = 
+        'SELECT t.ID_type, t.beds_number, t.double_bed, t.business, t.name, t.description, t.picture, r.numberOfAvailable FROM 
+        ' . addslashes($this::TABLE_TYPES) . ' t '. 
+        'INNER JOIN (
+         SELECT count(id_room) numberOfAvailable, ID_type FROM 
+         ' . addslashes(Room::TABLE_ROOMS) . '
+         WHERE ID_room NOT IN (
+            SELECT ID_room FROM 
+            ' . addslashes(Reservation::TABLE_RESERVATIONS) . '
+            WHERE (
+                (date_from >= :d_from and date_from < :d_to)
+                or
+                (date_to > :d_from and date_to <= :d_to)
             )
-            AND beds_number >= :beds_num
-        )';
+            or (date_from < :d_from and date_to > :d_to)
+            ) 
+         GROUP BY ID_type
+         ) r
+         ON r.ID_type = t.ID_type
+         WHERE t.beds_number >= :beds_num';
 
         $stmt = $this->conn->prepare($query);
 
@@ -144,6 +150,8 @@ class Type
             $this->business = htmlspecialchars((bool)$business);
             $this->name = htmlspecialchars($name);
             $this->description = htmlspecialchars($description);
+            $this->picture = htmlspecialchars($picture);
+            $this->numberOfAvailable = htmlspecialchars($numberOfAvailable);
 
             $data[] = clone ($this);
         }
