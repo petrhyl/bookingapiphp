@@ -2,7 +2,7 @@
 
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Methods: POST,PUT');
 header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Access-Control-Allow-Methods, Content-Type, Authorization, X-Requested-With');
 
 require_once '../../config/bootstrap.php';
@@ -39,7 +39,7 @@ if (count($data) < 4) {
     die();
 }
 
-// --- validate guest's attributes ---
+// --- validate params ---
 
 $frstname=strip_tags($data['guest']['firstname']);
 $lstname = strip_tags($data['guest']['lastname']);
@@ -59,46 +59,10 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     die();
 }
 
-// --- set database connection ---
-
-$db = new Database(DB_HOST, DB_NAME, DB_USERNAME, DB_PASSWORD);
-
-try {
-    $conn = $db->getConnection();
-} catch (PDOException $ex) {
-    http_response_code(500);
-    echo json_encode(["error" => ["message" => "Something went wrong."]]);
-    die();
-}
-
-$reservation = new Reservation($conn);
-
-$guest = new Guest($conn);
-
-$room = new Room($conn);
-
-// --- detabase connection is set
-
-// --- create guest ---
-
-$guest->firstname = $frstname;
-$guest->lastname=$lstname;
-$guest->email = $email;
-
-$guest_id = $guest->createWithNamesAndEmailAttributes();
-
-if ($guest_id === false) {
-    http_response_code(500);
-    echo json_encode(["error" => ["message" => "Something went wrong."]]);
-    die();
-}
-
-// --- validate other params ---
-
 $from = date_create(strip_tags($data['from']));
 $to = date_create(strip_tags($data['to']));
+$from->add(new DateInterval('PT20H30M')); // format pridani hodin a minut viz. dokumentace php
 $currentDate=new DateTime();
-$currentDate->setTime(1,0);
 
 if ($from === false || $to === false) {
     http_response_code(422);
@@ -106,15 +70,15 @@ if ($from === false || $to === false) {
     die();
 }
 
-if ($from > $to) {
+if ($from < $currentDate) {
     http_response_code(422);
-    echo json_encode(["error" => ["message" => "Date of arrival has to be earlier then date of leaving."]]);
+    echo json_encode(["error" => ["message" => "Date of arrival has to be later."]]);
     die();
 }
 
-if ($from <= $currentDate) {
+if ($from >= $to) {
     http_response_code(422);
-    echo json_encode(["error" => ["message" => "Date of arrival has to be later."]]);
+    echo json_encode(["error" => ["message" => "Date of arrival has to be earlier then date of leaving."]]);
     die();
 }
 
@@ -128,11 +92,46 @@ if (!filter_var($type_id_str, FILTER_VALIDATE_INT)) {
 
 $type_id = intval($type_id_str);
 
+
+// --- set database connection ---
+
+$db = new Database(DB_HOST, DB_NAME, DB_USERNAME, DB_PASSWORD);
+
+try {
+    $conn = $db->getConnection();
+} catch (PDOException $ex) {
+    http_response_code(500);
+    echo json_encode(["error" => ["message" => "Something went wrong. Cannot connect to database."]]);
+    die();
+}
+
+$reservation = new Reservation($conn);
+
+$guest = new Guest($conn);
+
+$room = new Room($conn);
+
+// --- detabase connection is set
+
 $found_room = $room->findOneFreeByTypeIdAndDateInterval($from, $to, $type_id);
 
 if ($found_room === false) {
     http_response_code(500);
-    echo json_encode(["error" => ["message" => "Something went wrong."]]);
+    echo json_encode(["error" => ["message" => "Something went wrong. No such a room available."]]);
+    die();
+}
+
+// --- create guest ---
+
+$guest->firstname = $frstname;
+$guest->lastname=$lstname;
+$guest->email = $email;
+
+$guest_id = $guest->createWithNamesAndEmailAttributes();
+
+if ($guest_id === false) {
+    http_response_code(500);
+    echo json_encode(["error" => ["message" => "Something went wrong. Cannot save client's data."]]);
     die();
 }
 
@@ -147,7 +146,7 @@ $result = $reservation->createNew();
 
 if ($result === false) {
     http_response_code(500);
-    echo json_encode(["error" => ["message" => "Something went wrong."]]);
+    echo json_encode(["error" => ["message" => "Something went wrong. Cannot create reservation."]]);
     die();
 }
 

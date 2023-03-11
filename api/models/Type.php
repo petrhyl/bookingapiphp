@@ -29,8 +29,6 @@ class Type
 
         $stmt->bindParam('id_type', $id_type, PDO::PARAM_INT);
 
-        $stmt->execute();
-
         $result = $stmt->execute();
 
         if ($result === false) {
@@ -40,7 +38,7 @@ class Type
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data === false) {
-            return $this;
+            return false;
         }
 
         $this->ID_type = htmlspecialchars($data['ID_type']);
@@ -139,9 +137,6 @@ class Type
     {
         $data = [];
         while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-            if ($row === false) {
-                break;
-            }
             extract($row);
 
             $this->ID_type = htmlspecialchars($ID_type);

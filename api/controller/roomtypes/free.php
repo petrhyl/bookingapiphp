@@ -34,62 +34,64 @@ require_once '../../config/bootstrap.php';
 //     ]
 // }
 
-if(!isset($_GET['from'])||!isset($_GET['to'])||!isset($_GET['persons'])){
+if (!isset($_GET['from']) || !isset($_GET['to']) || !isset($_GET['persons'])) {
     http_response_code(400);
-    echo json_encode(["error"=>["message"=>"Some parameter is missing"]]);
+    echo json_encode(["error" => ["message" => "Some parameter is missing"]]);
     die();
 }
 
 // --- validate params ---
 
-$from=date_create(strip_tags($_GET['from']));
-$to=date_create(strip_tags($_GET['to']));
+$from = date_create(strip_tags($_GET['from']));
+$to = date_create(strip_tags($_GET['to']));
 
 if (!$from || !$to) {
     http_response_code(400);
-    echo json_encode(["error"=>["message"=>"Invalid date format."]]);
+    echo json_encode(["error" => ["message" => "Invalid date format."]]);
     die();
 }
 
-if ($from>$to) {
+if ($from > $to) {
     http_response_code(422);
-    echo json_encode(["error"=>["message"=>"Date of arrival has to be earlier then date of leaving."]]);
+    echo json_encode(["error" => ["message" => "Date of arrival has to be earlier then date of leaving."]]);
     die();
 }
 
-$person_number_str=strip_tags($_GET['persons']);
+$person_number_str = strip_tags($_GET['persons']);
 
-if (!filter_var($person_number_str,FILTER_VALIDATE_INT)) {
+if (!filter_var($person_number_str, FILTER_VALIDATE_INT)) {
     http_response_code(422);
-    echo json_encode(["error"=>["message"=>"Parameter 'persons' is not a number."]]);
+    echo json_encode(["error" => ["message" => "Parameter 'persons' is not a number."]]);
     die();
 }
 
-$person_number=intval($person_number_str);
+$person_number = intval($person_number_str);
 
 // --- set database connection ---
 
-$db=new Database(DB_HOST,DB_NAME,DB_USERNAME,DB_PASSWORD);
+$db = new Database(DB_HOST, DB_NAME, DB_USERNAME, DB_PASSWORD);
 
 try {
     $conn = $db->getConnection();
 } catch (PDOException $ex) {
     http_response_code(500);
-    echo json_encode(["error" => ["message" => "Something went wrong."]]);
+    echo json_encode(["error" => ["message" => "Something went wrong. Cannto connect to database."]]);
     die();
 }
 
-$type=new Type($conn);
+$type = new Type($conn);
 
 // --- find free types of rooms ---
 
-$data['rooms']=$type->findFreeTypesByDateIntervalAndMinBedsNumber(
-    $from,$to,$person_number
+$data['rooms'] = $type->findFreeTypesByDateIntervalAndMinBedsNumber(
+    $from,
+    $to,
+    $person_number
 );
 
-if ($data['rooms']===false) {
+if ($data['rooms'] === false) {
     http_response_code(500);
-    echo json_encode(["error"=>["message"=>'No data. Something was wrong. Please contact help desk.']]);
+    echo json_encode(["error" => ["message" => 'No data. Something was wrong. Please contact help desk.']]);
     die();
 }
 

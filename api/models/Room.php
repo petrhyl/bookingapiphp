@@ -100,7 +100,7 @@ class Room
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data===false) {
-            return $this;
+            return false;
         }
 
         extract($data);
